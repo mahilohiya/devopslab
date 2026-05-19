@@ -15,6 +15,8 @@ import {
   Activity, RefreshCw, Cpu
 } from 'lucide-react';
 
+import { fetchHealth } from './api';
+
 // ── Navigation config ─────────────────────────────────────────
 const NAV = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -40,7 +42,7 @@ function App() {
   useEffect(() => {
     const check = async () => {
       try {
-        await fetch('http://localhost:8000/api/health');
+        await fetchHealth();
         setBackendOK(true);
       } catch {
         setBackendOK(false);
