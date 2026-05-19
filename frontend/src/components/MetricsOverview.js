@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import {
     Cpu, MemoryStick, HardDrive, Wifi,
-    TrendingUp, RefreshCw
+    TrendingUp
 } from 'lucide-react';
 import { fetchSystemMetrics, fetchMetricsHistory } from '../api';
 import ProgressRing from './ProgressRing';
