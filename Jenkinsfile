@@ -39,12 +39,10 @@ pipeline {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     sh '''
-                    echo "=== Checking SonarQube connectivity ==="
-                    curl -s -o /dev/null -w "SonarQube HTTP status: %{http_code}\n" http://host.docker.internal:9000/api/system/status || echo "WARNING: Cannot reach SonarQube at host.docker.internal:9000"
                     echo "=== Running SonarQube Scanner ==="
                     docker run --rm \
                         -e SONAR_HOST_URL="http://host.docker.internal:9000" \
-                        -e SONAR_LOGIN="${SONAR_TOKEN}" \
+                        -e SONAR_TOKEN="${SONAR_TOKEN}" \
                         -v "$(pwd):/usr/src" \
                         sonarsource/sonar-scanner-cli
                     '''
