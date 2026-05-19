@@ -66,7 +66,8 @@ pipeline {
                         --project "DevOps Monitor" \
                         --out /report \
                         --disableAssembly \
-                        --disableNodeAudit
+                        --disableNodeAudit \
+                        --nvdApiKey "e6fca2d1-0c7e-4b53-8f7f-6cff9e0e85e9"
                     '''
                 }
             }
