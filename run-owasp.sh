@@ -1,33 +1,32 @@
 #!/bin/bash
 
+# OWASP Dependency Check - runs via Docker
+# Reports saved to ./odc-reports/
+
 DC_VERSION="latest"
-DC_DIRECTORY=$HOME/OWASP-Dependency-Check
-DC_PROJECT="devopslabexam"
-DATA_DIRECTORY="$DC_DIRECTORY/data"
-CACHE_DIRECTORY="$DC_DIRECTORY/data/cache"
+DATA_DIRECTORY="$HOME/OWASP-Dependency-Check/data"
+CACHE_DIRECTORY="$HOME/OWASP-Dependency-Check/data/cache"
+REPORT_DIR="$(pwd)/odc-reports"
 
-if [ ! -d "$DATA_DIRECTORY" ]; then
-    echo "Initially creating persistent directory: $DATA_DIRECTORY"
-    mkdir -p "$DATA_DIRECTORY"
-fi
-if [ ! -d "$CACHE_DIRECTORY" ]; then
-    echo "Initially creating persistent directory: $CACHE_DIRECTORY"
-    mkdir -p "$CACHE_DIRECTORY"
-fi
+mkdir -p "$DATA_DIRECTORY" "$CACHE_DIRECTORY" "$REPORT_DIR"
 
-# Make sure we are using the latest version
+# Pull latest image
 docker pull owasp/dependency-check:$DC_VERSION
 
 docker run --rm \
-    -e user=$USER \
-    -u $(id -u ${USER}):$(id -g ${USER}) \
-    --volume $(pwd):/src:z \
-    --volume "$DATA_DIRECTORY":/usr/share/dependency-check/data:z \
-    --volume $(pwd)/odc-reports:/report:z \
+    -v "$(pwd):/src:z" \
+    -v "$DATA_DIRECTORY":/usr/share/dependency-check/data:z \
+    -v "$REPORT_DIR":/report:z \
     owasp/dependency-check:$DC_VERSION \
     --scan /src \
-    --format "ALL" \
-    --project "$DC_PROJECT" \
-    --out /report
-    
-echo "OWASP Dependency Check completed. Reports are in the odc-reports directory."
+    --format "HTML" \
+    --format "JSON" \
+    --project "DevOps Monitor" \
+    --out /report \
+    --disableAssembly \
+    --disableNodeAudit \
+    --noupdate
+
+echo ""
+echo "OWASP Dependency Check completed."
+echo "Open odc-reports/dependency-check-report.html to view results."
