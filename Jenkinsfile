@@ -11,45 +11,62 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Build Backend') {
             steps {
-                dir('backend') {
-                    sh 'docker build -t devopslabexam-backend .'
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    dir('backend') {
+                        sh 'docker build -t devops-monitor-backend .'
+                    }
                 }
             }
         }
-        
+
         stage('Build Frontend') {
             steps {
-                dir('frontend') {
-                    sh 'docker build -t devopslabexam-frontend .'
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    dir('frontend') {
+                        sh 'docker build -t devops-monitor-frontend .'
+                    }
                 }
             }
         }
-        
+
         stage('SonarQube Analysis') {
             environment {
-                // You need to configure this credential in Jenkins
                 SONAR_TOKEN = credentials('sonarqube-token')
             }
             steps {
-                // Assuming sonar-scanner is installed in Jenkins or using a dockerized scanner
-                sh '''
-                docker run --rm \
-                    -e SONAR_HOST_URL="http://localhost:9000" \
-                    -e SONAR_LOGIN="${SONAR_TOKEN}" \
-                    -v "$(pwd):/usr/src" \
-                    --network host \
-                    sonarsource/sonar-scanner-cli
-                '''
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh '''
+                    docker run --rm \
+                        -e SONAR_HOST_URL="http://host.docker.internal:9000" \
+                        -e SONAR_LOGIN="${SONAR_TOKEN}" \
+                        -v "$(pwd):/usr/src" \
+                        sonarsource/sonar-scanner-cli
+                    '''
+                }
             }
         }
-        
+
         stage('OWASP Dependency Check') {
             steps {
-                sh './run-owasp.sh'
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh 'chmod +x ./run-owasp.sh && ./run-owasp.sh'
+                }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        unstable {
+            echo 'Pipeline completed with some warnings. Check stage results.'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs above.'
         }
     }
 }
