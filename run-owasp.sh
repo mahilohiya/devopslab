@@ -24,8 +24,7 @@ docker run --rm \
     --project "DevOps Monitor" \
     --out /report \
     --disableAssembly \
-    --disableNodeAudit \
-    --noupdate
+    --disableNodeAudit
 
 echo ""
 echo "OWASP Dependency Check completed."

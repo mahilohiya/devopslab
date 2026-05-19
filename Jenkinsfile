@@ -52,8 +52,6 @@ pipeline {
         stage('OWASP Dependency Check') {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    // Using --noupdate to skip NVD/internet downloads (avoids network issues)
-                    // If running for the first time ever, remove --noupdate once to download the DB
                     sh '''
                     mkdir -p odc-reports
                     mkdir -p $HOME/OWASP-Dependency-Check/data
@@ -68,8 +66,7 @@ pipeline {
                         --project "DevOps Monitor" \
                         --out /report \
                         --disableAssembly \
-                        --disableNodeAudit \
-                        --noupdate
+                        --disableNodeAudit
                     '''
                 }
             }
