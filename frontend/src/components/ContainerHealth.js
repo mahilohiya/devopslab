@@ -1,8 +1,8 @@
 // ContainerHealth.js – Docker container health panel
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, RefreshCw, Server } from 'lucide-react';
-import { fetchContainers } from '../api';
+import { Box, RefreshCw, Server, Play, Square, Trash2, Plus } from 'lucide-react';
+import { fetchContainers, startContainer, stopContainer, deleteContainer } from '../api';
 import StatusBadge from './StatusBadge';
 
 // ── Mini bar ──────────────────────────────────────────────────
@@ -41,6 +41,7 @@ const ContainerHealth = () => {
     const [containers, setContainers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [lastSeen, setLastSeen] = useState('');
+    const [actionLoading, setActionLoading] = useState(null); // name of container being acted upon
 
     const refresh = useCallback(async () => {
         try {
@@ -60,6 +61,18 @@ const ContainerHealth = () => {
         return () => clearInterval(id);
     }, [refresh]);
 
+    const handleAction = async (name, actionFunc) => {
+        setActionLoading(name);
+        try {
+            await actionFunc(name);
+            await refresh();
+        } catch (err) {
+            alert(`Error: ${err.response?.data?.detail || err.message}`);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
     const running = containers.filter(c => c.status === 'running').length;
     const unhealthy = containers.filter(c => c.status !== 'running').length;
     const total = containers.length;
@@ -77,10 +90,19 @@ const ContainerHealth = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
             {/* Summary chips */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <StatChip label="Total" count={total} color="#8892b0" />
-                <StatChip label="Running" count={running} color="#10b981" />
-                <StatChip label="Unhealthy" count={unhealthy} color="#ef4444" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    <StatChip label="Total" count={total} color="#8892b0" />
+                    <StatChip label="Running" count={running} color="#10b981" />
+                    <StatChip label="Unhealthy" count={unhealthy} color="#ef4444" />
+                </div>
+                <button
+                    className="refresh-btn"
+                    style={{ background: 'var(--accent-blue)', color: 'white', border: 'none' }}
+                    onClick={() => alert("To create a container, use terminal: docker run -d --name new-container nginx")}
+                >
+                    <Plus size={14} /> New Container
+                </button>
             </div>
 
             {/* Container table */}
@@ -110,18 +132,19 @@ const ContainerHealth = () => {
                                 <th>Status</th>
                                 <th>CPU</th>
                                 <th>Memory</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {containers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
+                                    <td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                                         No containers found.
                                     </td>
                                 </tr>
                             ) : (
                                 containers.map((c, i) => (
-                                    <tr key={i}>
+                                    <tr key={i} style={{ opacity: actionLoading === c.name ? 0.5 : 1 }}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                                 <div style={{
@@ -159,6 +182,40 @@ const ContainerHealth = () => {
                                                 value={c.mem_percent}
                                                 color={c.mem_percent > 80 ? '#ef4444' : c.mem_percent > 60 ? '#f59e0b' : '#8b5cf6'}
                                             />
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                                                {c.status === 'running' ? (
+                                                    <button
+                                                        className="refresh-btn"
+                                                        style={{ padding: '4px 8px', borderColor: '#f59e0b', color: '#f59e0b' }}
+                                                        onClick={() => handleAction(c.name, stopContainer)}
+                                                        disabled={actionLoading === c.name}
+                                                    >
+                                                        <Square size={12} fill="#f59e0b" /> Stop
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="refresh-btn"
+                                                        style={{ padding: '4px 8px', borderColor: '#10b981', color: '#10b981' }}
+                                                        onClick={() => handleAction(c.name, startContainer)}
+                                                        disabled={actionLoading === c.name}
+                                                    >
+                                                        <Play size={12} fill="#10b981" /> Start
+                                                    </button>
+                                                )}
+                                                <button
+                                                    className="refresh-btn"
+                                                    style={{ padding: '4px 8px', borderColor: '#ef4444', color: '#ef4444' }}
+                                                    onClick={() => {
+                                                        if (window.confirm(`Delete container ${c.name}?`))
+                                                            handleAction(c.name, deleteContainer)
+                                                    }}
+                                                    disabled={actionLoading === c.name}
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

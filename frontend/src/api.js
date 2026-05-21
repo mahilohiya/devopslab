@@ -2,12 +2,18 @@
 
 import axios from 'axios';
 
-const BASE = 'https://devops-monitor-backend.onrender.com/api';
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const BASE = isLocal
+    ? 'http://localhost:8000/api'
+    : 'https://devops-monitor-backend.onrender.com/api';
 
 const api = axios.create({ baseURL: BASE, timeout: 10000 });
 
 export const fetchSystemMetrics = () => api.get('/metrics/system').then(r => r.data);
 export const fetchContainers = () => api.get('/metrics/containers').then(r => r.data);
+export const startContainer = (name) => api.post(`/containers/${name}/start`).then(r => r.data);
+export const stopContainer = (name) => api.post(`/containers/${name}/stop`).then(r => r.data);
+export const deleteContainer = (name) => api.delete(`/containers/${name}`).then(r => r.data);
 export const fetchMetricsHistory = (limit = 60) => api.get(`/metrics/history?limit=${limit}`).then(r => r.data);
 export const fetchDeployments = () => api.get('/deployments').then(r => r.data);
 export const addDeployment = (data) => api.post('/deployments', data).then(r => r.data);

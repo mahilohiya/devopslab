@@ -4,6 +4,9 @@ main.py  –  DevOps Monitoring Dashboard  –  FastAPI Backend
 Endpoints:
   GET  /api/metrics/system      – live CPU / RAM / Disk / Network
   GET  /api/metrics/containers  – Docker container health list
+  POST /api/containers/{name}/start – Start a container
+  POST /api/containers/{name}/stop  – Stop a container
+  DELETE /api/containers/{name}     – Remove a container
   GET  /api/metrics/history     – last N system metric snapshots
   GET  /api/deployments         – recent deployments
   POST /api/deployments         – add deployment record
@@ -325,3 +328,41 @@ def get_predictions_history(limit: int = 20, db: Session = Depends(get_db)):
         }
         for r in rows
     ]
+
+# ── Container CRUD Routes ─────────────────────────────────────────────────────
+
+@app.post("/api/containers/{name}/start")
+def start_container(name: str):
+    """Start a stopped container."""
+    try:
+        import docker
+        client = docker.from_env()
+        container = client.containers.get(name)
+        container.start()
+        return {"message": f"Container {name} started successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/containers/{name}/stop")
+def stop_container(name: str):
+    """Stop a running container."""
+    try:
+        import docker
+        client = docker.from_env()
+        container = client.containers.get(name)
+        container.stop()
+        return {"message": f"Container {name} stopped successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/containers/{name}")
+def delete_container(name: str):
+    """Remove a container."""
+    try:
+        import docker
+        client = docker.from_env()
+        container = client.containers.get(name)
+        container.remove(force=True)
+        return {"message": f"Container {name} removed successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
