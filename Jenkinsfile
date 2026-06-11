@@ -18,7 +18,6 @@ pipeline {
 
         stage('SonarQube Scan') {
             steps {
-                // We use a "Silent Success" block so the build stays green even if the token is missing
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                     sh '''
                     echo "=== Running SonarQube Scanner ==="
@@ -47,30 +46,11 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy & Log') {
-            steps {
-                script {
-                    echo "=== Automating Deployment Audit Log ==="
-                    sh '''
-                    curl -X POST http://host.docker.internal:8000/api/deployments \
-                        -H "Content-Type: application/json" \
-                        -d "{
-                            \\"service\\": \\"devops-monitor\\",
-                            \\"version\\": \\"build-${BUILD_NUMBER}\\",
-                            \\"status\\": \\"success\\",
-                            \\"environment\\": \\"prod\\",
-                            \\"deployed_by\\": \\"jenkins-ci\\"
-                        }"
-                    '''
-                }
-            }
-        }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully with security scans!'
+            echo 'Pipeline completed successfully with security tools!'
         }
     }
 }
