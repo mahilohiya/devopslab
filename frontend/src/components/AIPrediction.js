@@ -174,10 +174,20 @@ const AIPrediction = () => {
                         <p style={{ fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 8 }}>
                             {pred.message}
                         </p>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                            Method: <span style={{ color: cfg.color }}>{pred.method || 'rule-based'}</span>
-                            &nbsp;·&nbsp;
-                            Analysed: {pred.timestamp ? new Date(pred.timestamp).toLocaleTimeString() : 'now'}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
+                            <div style={{
+                                background: 'rgba(255,255,255,0.05)',
+                                border: `1px solid ${cfg.border}`,
+                                borderRadius: 8, padding: '4px 10px',
+                                fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)',
+                                display: 'flex', alignItems: 'center', gap: 6
+                            }}>
+                                <Zap size={12} color={cfg.color} />
+                                Engine: <span style={{ color: 'white', textTransform: 'uppercase' }}>{pred.method || 'rule-based'}</span>
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                                Analysed: {pred.timestamp ? new Date(pred.timestamp).toLocaleTimeString() : 'now'}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -23,6 +23,8 @@ from typing import List, Optional
 import psutil
 from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -366,3 +368,27 @@ def delete_container(name: str):
         return {"message": f"Container {name} removed successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ── Serve Frontend ────────────────────────────────────────────────────────────
+
+import os
+
+# Path to the frontend build directory
+frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "build")
+
+if os.path.exists(frontend_path):
+    # Mount static files (JS, CSS, images)
+    app.mount("/static", StaticFiles(directory=os.path.join(frontend_path, "static")), name="static")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        """Serve the frontend index.html for any non-API route."""
+        if full_path.startswith("api"):
+            raise HTTPException(status_code=404, detail="API route not found")
+        
+        file_path = os.path.join(frontend_path, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(frontend_path, "index.html"))
+else:
+    logger.warning(f"Frontend build directory not found at {frontend_path}. Frontend will not be served.")

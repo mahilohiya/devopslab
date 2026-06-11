@@ -202,18 +202,23 @@ const DeploymentStatus = () => {
                     className="refresh-btn"
                     id="btn-add-deployment"
                     onClick={() => setShowModal(true)}
-                    style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', borderColor: 'rgba(16,185,129,0.3)' }}
+                    style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', borderColor: 'var(--border)' }}
                 >
-                    <Plus size={14} /> Log Deployment
+                    <Plus size={14} /> Manual Entry
                 </button>
             </div>
 
             {/* Deployment list */}
             <div className="card">
                 <div className="card-header">
-                    <span className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Rocket size={14} /> Deployment History
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Rocket size={14} /> Deployment Audit Trail
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                            Tracking the history of service updates, environment changes, and deployment ownership.
+                        </span>
+                    </div>
                 </div>
 
                 {deployments.length === 0 ? (

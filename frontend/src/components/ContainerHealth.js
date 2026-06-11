@@ -1,7 +1,7 @@
 // ContainerHealth.js – Docker container health panel
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, RefreshCw, Server, Play, Square, Trash2, Plus } from 'lucide-react';
+import { Box, RefreshCw, Server, Play, Square, Trash2 } from 'lucide-react';
 import { fetchContainers, startContainer, stopContainer, deleteContainer } from '../api';
 import StatusBadge from './StatusBadge';
 
@@ -96,13 +96,6 @@ const ContainerHealth = () => {
                     <StatChip label="Running" count={running} color="#10b981" />
                     <StatChip label="Unhealthy" count={unhealthy} color="#ef4444" />
                 </div>
-                <button
-                    className="refresh-btn"
-                    style={{ background: 'var(--accent-blue)', color: 'white', border: 'none' }}
-                    onClick={() => alert("To create a container, use terminal: docker run -d --name new-container nginx")}
-                >
-                    <Plus size={14} /> New Container
-                </button>
             </div>
 
             {/* Container table */}
