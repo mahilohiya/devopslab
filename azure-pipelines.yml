@@ -1,0 +1,78 @@
+trigger:
+- main
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  # If you have an Azure Container Registry (ACR), define it here
+  # registryName: 'myregistry.azurecr.io'
+  backendImageName: 'devops-monitor-backend'
+  frontendImageName: 'devops-monitor-frontend'
+
+stages:
+- stage: Build
+  displayName: 'Build Stage'
+  jobs:
+  - job: BuildAndScan
+    displayName: 'Build and Scan'
+    steps:
+    # 1. Build Backend Docker Image
+    - script: |
+        echo "=== Building Backend Docker Image ==="
+        docker build -t $(backendImageName):$(Build.BuildId) -t $(backendImageName):latest ./backend
+      displayName: 'Build Backend Docker Image'
+
+    # 2. Build Frontend Docker Image
+    - script: |
+        echo "=== Building Frontend Docker Image ==="
+        docker build -t $(frontendImageName):$(Build.BuildId) -t $(frontendImageName):latest ./frontend
+      displayName: 'Build Frontend Docker Image'
+
+    # 3. SonarQube Scanner (Optional: requires SonarQube service connection in Azure DevOps)
+    # Alternatively, running the Docker scanner command like in Jenkinsfile:
+    - script: |
+        echo "=== Running SonarQube Scanner ==="
+        # Note: Set your SONAR_TOKEN as a secret pipeline variable in Azure DevOps
+        if [ -n "$(SONAR_TOKEN)" ]; then
+          docker run --rm \
+            -e SONAR_HOST_URL="http://host.docker.internal:9000" \
+            -e SONAR_TOKEN="$(SONAR_TOKEN)" \
+            -v "$(System.DefaultWorkingDirectory):/usr/src" \
+            sonarsource/sonar-scanner-cli
+        else
+          echo "Skipping SonarQube because SONAR_TOKEN is not set."
+        fi
+      displayName: 'SonarQube Analysis'
+      continueOnError: true
+
+    # 4. OWASP Dependency Check
+    - script: |
+        echo "=== Running OWASP Dependency Check ==="
+        mkdir -p odc-reports
+        mkdir -p $(Agent.HomeDirectory)/OWASP-Dependency-Check/data
+
+        docker run --rm \
+          -v "$(System.DefaultWorkingDirectory):/src:z" \
+          -v "$(Agent.HomeDirectory)/OWASP-Dependency-Check/data":/usr/share/dependency-check/data:z \
+          -v "$(System.DefaultWorkingDirectory)/odc-reports":/report:z \
+          owasp/dependency-check:latest \
+          --scan /src \
+          --format "HTML" \
+          --project "DevOps Monitor" \
+          --out /report \
+          --disableAssembly \
+          --disableNodeAudit \
+          --nvdApiKey "$(NVD_API_KEY)"
+      displayName: 'OWASP Dependency Check'
+      continueOnError: true
+
+    # 5. Publish OWASP Scan Report to Pipeline Artifacts
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)/odc-reports'
+        artifact: 'OWASP-Reports'
+        publishLocation: 'pipeline'
+      displayName: 'Publish Scan Reports'
+      condition: always()
