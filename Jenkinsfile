@@ -46,28 +46,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy & Log') {
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                    script {
-                        echo "=== Automating Deployment Audit Log ==="
-                        // Since Jenkins is running natively on Mac, we use localhost:8000
-                        sh '''
-                        curl -X POST http://localhost:8000/api/deployments \
-                            -H "Content-Type: application/json" \
-                            -d "{
-                                \\"service\\": \\"devops-monitor\\",
-                                \\"version\\": \\"build-${BUILD_NUMBER}\\",
-                                \\"status\\": \\"success\\",
-                                \\"environment\\": \\"prod\\",
-                                \\"deployed_by\\": \\"jenkins-ci\\"
-                            }"
-                        '''
-                    }
-                }
-            }
-        }
     }
 
     post {
