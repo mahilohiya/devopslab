@@ -84,6 +84,7 @@ const AIPrediction = () => {
     const [history, setHist] = useState([]);
     const [loading, setLoad] = useState(true);
     const [running, setRun] = useState(false);
+    const [error, setError] = useState(null);
     const [engine, setEngine] = useState('auto'); // auto, openai, ollama, rule-based
 
     const loadHistory = useCallback(async () => {
@@ -99,6 +100,7 @@ const AIPrediction = () => {
 
     const runPrediction = useCallback(async (selectedEngine) => {
         setRun(true);
+        setError(null);
         const targetEngine = selectedEngine || (engine === 'auto' ? null : engine);
         try {
             const result = await fetchPrediction(targetEngine);
@@ -106,6 +108,7 @@ const AIPrediction = () => {
             await loadHistory();
         } catch (err) {
             console.error('Prediction error:', err);
+            setError('Failed to reach AI Engine. Ensure the backend is running.');
         } finally {
             setRun(false);
             setLoad(false);
@@ -176,7 +179,16 @@ const AIPrediction = () => {
             </div>
 
             {/* ── Risk banner ── */}
-            {loading ? (
+            {error ? (
+                <div style={{
+                    padding: 20, borderRadius: 12, background: 'rgba(239,68,68,0.1)',
+                    border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444',
+                    display: 'flex', alignItems: 'center', gap: 12
+                }}>
+                    <AlertTriangle size={20} />
+                    {error}
+                </div>
+            ) : loading ? (
                 <div className="loading-spinner"><div className="spinner" />Running AI analysis…</div>
             ) : pred ? (
                 <div className="ai-risk-banner" style={{
