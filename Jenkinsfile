@@ -24,6 +24,7 @@ pipeline {
                     docker run --rm \
                         -e SONAR_HOST_URL="http://host.docker.internal:9000" \
                         -e SONAR_LOGIN="admin" \
+                        -e SONAR_PASSWORD="admin" \
                         -v "$(pwd):/usr/src" \
                         sonarsource/sonar-scanner-cli
                     '''
