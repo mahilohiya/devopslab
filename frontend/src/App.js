@@ -17,6 +17,8 @@ import {
 
 import { fetchHealth } from './api';
 
+import Login from './components/Login';
+
 // ── Navigation config ─────────────────────────────────────────
 const NAV = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -37,6 +39,17 @@ function App() {
   const [activeTab, setActiveTab] = useState('overview');
   const [backendOK, setBackendOK] = useState(null); // null=checking, true=ok, false=down
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [user, setUser] = useState(localStorage.getItem('user') || null);
+
+  const handleLogin = (data) => {
+    setUser(data.user);
+    localStorage.setItem('user', data.user);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+  };
 
   // Poll backend health
   useEffect(() => {
@@ -58,6 +71,10 @@ function App() {
     const id = setInterval(() => setLastRefresh(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   // Render active page
   const renderPage = () => {
@@ -131,6 +148,14 @@ function App() {
             <span className="last-updated">
               {lastRefresh.toLocaleTimeString()}
             </span>
+
+            <button
+              className="refresh-btn"
+              onClick={handleLogout}
+              style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
+            >
+              Logout
+            </button>
 
             <button
               className="refresh-btn"

@@ -204,11 +204,18 @@ Containers: {json.dumps(metrics.get('containers', []))}
 
 # ── Public entry point ────────────────────────────────────────────────────────
 
-async def predict_failure(metrics: Dict[str, Any]) -> Dict[str, Any]:
+async def predict_failure(metrics: Dict[str, Any], engine: Optional[str] = None) -> Dict[str, Any]:
     """
-    Main entry: picks the best available predictor.
-    Priority: OpenAI → Ollama → Rule-based
+    Main entry: picks the best available predictor or uses the requested one.
     """
+    if engine == "openai":
+        return await openai_prediction(metrics)
+    elif engine == "ollama":
+        return await ollama_prediction(metrics)
+    elif engine == "rule-based":
+        return rule_based_prediction(metrics)
+    
+    # Default priority logic
     if OPENAI_API_KEY and OPENAI_API_KEY != "your_openai_api_key_here":
         return await openai_prediction(metrics)
     elif USE_OLLAMA:

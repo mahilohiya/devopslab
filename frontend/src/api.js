@@ -17,6 +17,7 @@ export const deleteContainer = (name) => api.delete(`/containers/${name}`).then(
 export const fetchMetricsHistory = (limit = 60) => api.get(`/metrics/history?limit=${limit}`).then(r => r.data);
 export const fetchDeployments = () => api.get('/deployments').then(r => r.data);
 export const addDeployment = (data) => api.post('/deployments', data).then(r => r.data);
-export const fetchPrediction = () => api.get('/predict').then(r => r.data);
+export const fetchPrediction = (engine) => api.get(`/predict${engine ? `?engine=${engine}` : ''}`).then(r => r.data);
 export const fetchPredHistory = () => api.get('/predictions/history').then(r => r.data);
 export const fetchHealth = () => api.get('/health').then(r => r.data);
+export const login = (username, password) => api.post('/login', { username, password }).then(r => r.data);

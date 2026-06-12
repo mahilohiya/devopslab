@@ -84,6 +84,7 @@ const AIPrediction = () => {
     const [history, setHist] = useState([]);
     const [loading, setLoad] = useState(true);
     const [running, setRun] = useState(false);
+    const [engine, setEngine] = useState('auto'); // auto, openai, ollama, rule-based
 
     const loadHistory = useCallback(async () => {
         try {
@@ -96,10 +97,11 @@ const AIPrediction = () => {
         } catch { }
     }, []);
 
-    const runPrediction = useCallback(async () => {
+    const runPrediction = useCallback(async (selectedEngine) => {
         setRun(true);
+        const targetEngine = selectedEngine || (engine === 'auto' ? null : engine);
         try {
-            const result = await fetchPrediction();
+            const result = await fetchPrediction(targetEngine);
             setPred(result);
             await loadHistory();
         } catch (err) {
@@ -108,7 +110,7 @@ const AIPrediction = () => {
             setRun(false);
             setLoad(false);
         }
-    }, [loadHistory]);
+    }, [loadHistory, engine]);
 
     // Auto-run on mount, then every 30 s
     useEffect(() => {
@@ -142,16 +144,35 @@ const AIPrediction = () => {
                         </div>
                     </div>
                 </div>
-                <button
-                    className="refresh-btn"
-                    id="btn-run-prediction"
-                    onClick={runPrediction}
-                    disabled={running}
-                    style={{ opacity: running ? 0.6 : 1 }}
-                >
-                    <RefreshCw size={12} style={{ animation: running ? 'spin 0.8s linear infinite' : 'none' }} />
-                    {running ? 'Analysing…' : 'Re-analyse'}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <select
+                        value={engine}
+                        onChange={(e) => {
+                            setEngine(e.target.value);
+                            runPrediction(e.target.value === 'auto' ? null : e.target.value);
+                        }}
+                        style={{
+                            background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                            borderRadius: 8, padding: '6px 12px', color: 'white', fontSize: 12,
+                            outline: 'none'
+                        }}
+                    >
+                        <option value="auto">Auto-Select</option>
+                        <option value="openai">OpenAI GPT-4o</option>
+                        <option value="ollama">Ollama (Local)</option>
+                        <option value="rule-based">Rule-Based</option>
+                    </select>
+                    <button
+                        className="refresh-btn"
+                        id="btn-run-prediction"
+                        onClick={() => runPrediction()}
+                        disabled={running}
+                        style={{ opacity: running ? 0.6 : 1 }}
+                    >
+                        <RefreshCw size={12} style={{ animation: running ? 'spin 0.8s linear infinite' : 'none' }} />
+                        {running ? 'Analysing…' : 'Re-analyse'}
+                    </button>
+                </div>
             </div>
 
             {/* ── Risk banner ── */}

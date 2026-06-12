@@ -212,8 +212,20 @@ class DeploymentCreate(BaseModel):
     environment: str
     deployed_by: str
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+
+@app.post("/api/login")
+def login(payload: LoginRequest):
+    """Simple mock login for demonstration."""
+    if payload.username == "admin" and payload.password == "admin":
+        return {"status": "success", "user": "admin", "token": "mock-jwt-token"}
+    raise HTTPException(status_code=401, detail="Invalid username or password")
+
 
 @app.get("/api/health")
 def health_check():
@@ -287,16 +299,16 @@ def create_deployment(payload: DeploymentCreate, db: Session = Depends(get_db)):
 
 
 @app.get("/api/predict")
-async def get_prediction(db: Session = Depends(get_db)):
+async def get_prediction(engine: Optional[str] = None, db: Session = Depends(get_db)):
     """
     Run AI failure prediction based on current live metrics + container health.
-    Persists result to DB and returns prediction JSON.
+    Supports optional 'engine' parameter (openai, ollama, rule-based).
     """
     metrics    = _get_live_system_metrics()
     containers = _get_containers()
     metrics["containers"] = containers
 
-    result = await predict_failure(metrics)
+    result = await predict_failure(metrics, engine=engine)
 
     # Persist prediction
     pred_row = Prediction(
