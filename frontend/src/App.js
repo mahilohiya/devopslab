@@ -18,10 +18,6 @@ import {
 import { fetchHealth } from './api';
 import Login from './components/Login';
 
-// ── Global DevOps Configuration ───────────────────────────────
-// Set this to true to enable the "Clean Light" theme
-const IS_LIGHT_THEME = false;
-
 // ── Navigation config ─────────────────────────────────────────
 const NAV = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -91,13 +87,13 @@ function App() {
   };
 
   return (
-    <div className={`app-shell ${IS_LIGHT_THEME ? 'light-mode' : ''}`}>
+    <div className="app-shell">
 
       {/* ── Sidebar ── */}
       <nav className="sidebar" role="navigation" aria-label="Dashboard navigation">
         {/* Logo */}
         <div className="sidebar-logo">
-          <Cpu size={22} color={IS_LIGHT_THEME ? 'var(--accent-blue)' : 'white'} />
+          <Cpu size={22} color="white" />
         </div>
 
         <div className="sidebar-nav">
