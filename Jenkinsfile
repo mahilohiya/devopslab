@@ -18,16 +18,18 @@ pipeline {
 
         stage('SonarQube Scan') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                    sh '''
-                    echo "=== Running SonarQube Scanner ==="
-                    docker run --rm \
-                        -e SONAR_HOST_URL="http://host.docker.internal:9000" \
-                        -e SONAR_LOGIN="admin" \
-                        -e SONAR_PASSWORD="admin" \
-                        -v "$(pwd):/usr/src" \
-                        sonarsource/sonar-scanner-cli
-                    '''
+                // This looks for the 'sonarqube-token' ID you created in Jenkins
+                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                        sh '''
+                        echo "=== Running SonarQube Scanner ==="
+                        docker run --rm \
+                            -e SONAR_HOST_URL="http://host.docker.internal:9000" \
+                            -e SONAR_TOKEN="${SONAR_TOKEN}" \
+                            -v "$(pwd):/usr/src" \
+                            sonarsource/sonar-scanner-cli
+                        '''
+                    }
                 }
             }
         }
@@ -51,7 +53,7 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline completed successfully with secure SonarQube token!'
         }
     }
 }
