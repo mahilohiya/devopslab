@@ -20,7 +20,7 @@ import Login from './components/Login';
 
 // ── Global DevOps Configuration ───────────────────────────────
 // Set this to true to enable the "Clean Light" theme
-const IS_LIGHT_THEME = true;
+const IS_LIGHT_THEME = false;
 
 // ── Navigation config ─────────────────────────────────────────
 const NAV = [
