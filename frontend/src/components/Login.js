@@ -87,9 +87,6 @@ const Login = ({ onLogin }) => {
                     </button>
                 </form>
 
-                <div style={{ marginTop: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-                    Demo Credentials: <span style={{ color: 'var(--accent-blue)' }}>admin / admin</span>
-                </div>
             </div>
         </div>
     );
