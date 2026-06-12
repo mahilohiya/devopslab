@@ -41,7 +41,7 @@ pipeline {
                         -v "$(pwd):/src:z" \
                         -v "$(pwd)/odc-reports:/report:z" \
                         owasp/dependency-check:latest \
-                        --scan /src --format HTML --project "DevOps Monitor" --out /report --disableAssembly --disableNodeAudit --noupdate
+                        --scan /src --format HTML --project "DevOps Monitor" --out /report --disableAssembly --disableNodeAudit
                     '''
                 }
             }
