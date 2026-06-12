@@ -8,7 +8,7 @@
 /* ── Design tokens ─────────────────────────────────────────── */
 :root {
   /* Base palette */
-  --bg-primary: #ffffff;
+  --bg-primary: #0a0e1a;
   --bg-secondary: #0f1629;
   --bg-card: #141c2e;
   --bg-card-hover: #1a2440;
