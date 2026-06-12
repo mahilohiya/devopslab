@@ -16,8 +16,11 @@ import {
 } from 'lucide-react';
 
 import { fetchHealth } from './api';
-
 import Login from './components/Login';
+
+// ── Global DevOps Configuration ───────────────────────────────
+// Set this to true to enable the "Clean Light" theme
+const IS_LIGHT_THEME = true;
 
 // ── Navigation config ─────────────────────────────────────────
 const NAV = [
@@ -88,13 +91,13 @@ function App() {
   };
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${IS_LIGHT_THEME ? 'light-mode' : ''}`}>
 
       {/* ── Sidebar ── */}
       <nav className="sidebar" role="navigation" aria-label="Dashboard navigation">
         {/* Logo */}
         <div className="sidebar-logo">
-          <Cpu size={22} color="white" />
+          <Cpu size={22} color={IS_LIGHT_THEME ? 'var(--accent-blue)' : 'white'} />
         </div>
 
         <div className="sidebar-nav">

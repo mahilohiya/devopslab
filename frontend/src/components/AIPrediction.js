@@ -153,7 +153,7 @@ const AIPrediction = () => {
                         }}
                         style={{
                             background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                            borderRadius: 8, padding: '6px 12px', color: 'white', fontSize: 12,
+                            borderRadius: 8, padding: '6px 12px', color: 'var(--text-primary)', fontSize: 12,
                             outline: 'none'
                         }}
                     >
@@ -204,7 +204,7 @@ const AIPrediction = () => {
                                 display: 'flex', alignItems: 'center', gap: 6
                             }}>
                                 <Zap size={12} color={cfg.color} />
-                                Engine: <span style={{ color: 'white', textTransform: 'uppercase' }}>{pred.method || 'rule-based'}</span>
+                                Engine: <span style={{ color: 'var(--text-primary)', textTransform: 'uppercase' }}>{pred.method || 'rule-based'}</span>
                             </div>
                             <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                                 Analysed: {pred.timestamp ? new Date(pred.timestamp).toLocaleTimeString() : 'now'}
